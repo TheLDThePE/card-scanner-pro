@@ -1,0 +1,23 @@
+{
+    "name": "Card Scanner Pro - Evacuation Drill",
+    "short_name": "Card Scanner",
+    "description": "Evacuation drill attendance tracking system with RFID card scanning",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#3b82f6",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/vite.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": [
+        "productivity",
+        "utilities"
+    ],
+    "screenshots": []
+}

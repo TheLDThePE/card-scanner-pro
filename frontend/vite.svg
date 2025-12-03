@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Card Background -->
+  <rect x="15" y="25" width="70" height="50" rx="5" fill="url(#cardGradient)" />
+  
+  <!-- Card Details -->
+  <rect x="22" y="35" width="25" height="3" rx="1.5" fill="white" opacity="0.8" />
+  <rect x="22" y="42" width="35" height="2" rx="1" fill="white" opacity="0.6" />
+  <rect x="22" y="47" width="30" height="2" rx="1" fill="white" opacity="0.6" />
+  
+  <!-- Scanner Beam -->
+  <rect x="10" y="45" width="80" height="3" fill="#22c55e" opacity="0.7">
+    <animate attributeName="y" values="25;70;25" dur="2s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2s" repeatCount="indefinite" />
+  </rect>
+  
+  <!-- Checkmark -->
+  <circle cx="72" cy="60" r="10" fill="#22c55e" />
+  <path d="M 68 60 L 71 63 L 76 57" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

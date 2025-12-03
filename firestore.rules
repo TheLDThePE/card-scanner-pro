@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read/write for scans collection
+    match /scans/{document=**} {
+      allow read, write: if true;
+    }
+    
+    // Allow read/write for cards collection (for initial data upload)
+    // TODO: Change to read-only after data is uploaded
+    match /cards/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}

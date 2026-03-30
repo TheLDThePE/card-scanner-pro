@@ -7,9 +7,17 @@ let isLoaded = false;
 let listeners = [];
 let loadPromise = null;
 
+// ✅ pad input ให้ครบ 10 หลักถ้าเป็นตัวเลขล้วน
+const normalizeCardNo = (input) => {
+    const trimmed = (input || '').toString().trim();
+    return /^\d+$/.test(trimmed)
+        ? trimmed.padStart(10, '0')
+        : trimmed.toUpperCase();
+};
+
 // Load cards collection ONCE
 const loadCards = async () => {
-    if (loadPromise) return loadPromise; // Prevent duplicate loads
+    if (loadPromise) return loadPromise;
 
     loadPromise = (async () => {
         try {
@@ -23,14 +31,13 @@ const loadCards = async () => {
 
             isLoaded = true;
 
-            // Notify all listeners
             listeners.forEach(callback => callback());
-            listeners = []; // Clear listeners after notifying
+            listeners = [];
 
             console.log(`Loaded ${Object.keys(CARD_DATABASE).length} cards from Firestore`);
         } catch (error) {
             console.error('Error loading cards:', error);
-            loadPromise = null; // Allow retry on error
+            loadPromise = null;
             throw error;
         }
     })();
@@ -43,7 +50,8 @@ loadCards();
 
 // Get card details by card number
 export const getCardDetails = (cardNumber) => {
-    return CARD_DATABASE[cardNumber] || null;
+    // ✅ normalize ก่อน lookup เสมอ
+    return CARD_DATABASE[normalizeCardNo(cardNumber)] || null;
 };
 
 // Get card details by EmpNo
@@ -59,8 +67,11 @@ export const getAllCards = () => {
 
 // Search by either CardNo or EmpNo
 export const searchCard = (input) => {
-    // First try CardNo (exact match)
-    let card = CARD_DATABASE[input];
+    // ✅ normalize input ก่อน search ทุกครั้ง
+    const normalized = normalizeCardNo(input);
+
+    // First try CardNo (exact match หลัง normalize)
+    let card = CARD_DATABASE[normalized];
     if (card) return card;
 
     // Then try EmpNo (case-insensitive)

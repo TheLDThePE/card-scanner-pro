@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-// import { Scan, Keyboard } from 'lucide-react';
+import { ScanLine, Keyboard } from 'lucide-react'; // ✅ เปลี่ยน Scan → ScanLine
 
 const ScanInput = ({ onScan }) => {
     const [input, setInput] = useState('');
@@ -11,10 +11,9 @@ const ScanInput = ({ onScan }) => {
 
         el.focus();
 
+        // ✅ เปิด auto-refocus — ป้องกัน iOS focus หาย
         const handleBlur = () => {
             setTimeout(() => {
-                // ✅ ตรวจสอบก่อนว่า focus ไปอยู่ที่ element อื่นไหม
-                // ถ้า focus อยู่ที่ input อื่น (เช่น modal) → ไม่ดึงกลับ
                 const activeEl = document.activeElement;
                 const isOtherInput =
                     activeEl &&
@@ -34,6 +33,7 @@ const ScanInput = ({ onScan }) => {
     }, []);
 
     const handleChange = (e) => {
+        // ✅ แค่แสดงค่า — useCardReader จัดการ CardNo แล้ว
         setInput(e.target.value.toUpperCase());
     };
 
@@ -42,14 +42,13 @@ const ScanInput = ({ onScan }) => {
             e.preventDefault();
             const trimmed = input.trim();
 
-            // ✅ ถ้าเป็นตัวเลขล้วน → ปล่อยให้ useCardReader จัดการ
-            //    ScanInput จัดการเฉพาะ EmpNo (มีตัวอักษร) เท่านั้น
+            // ✅ ตัวเลขล้วน = CardNo → ปล่อยให้ useCardReader จัดการ ไม่ยิงซ้ำ
             if (/^\d+$/.test(trimmed)) {
                 setInput('');
-                return; // ← ไม่ยิง onScan ซ้ำ!
+                return;
             }
 
-            // EmpNo เช่น P1553, D6702
+            // EmpNo เช่น P1553, D6702 → pad ไม่ได้ ส่งตรง
             onScan(trimmed.toUpperCase());
             setInput('');
         }
@@ -59,10 +58,10 @@ const ScanInput = ({ onScan }) => {
         <div className="w-full max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
-                    <Scan className="w-6 h-6 text-blue-600" />
+                    <ScanLine className="w-6 h-6 text-blue-600" />
                     Scan Card
                 </h2>
-                // <Keyboard className="w-5 h-5 text-gray-400" />
+                <Keyboard className="w-5 h-5 text-gray-400" />
             </div>
 
             <div className="relative">
@@ -73,7 +72,7 @@ const ScanInput = ({ onScan }) => {
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}
                     maxLength={20}
-                    placeholder="Scan CardNo .."
+                    placeholder="Scan CardNo or type EmpNo..."
                     inputMode="none"
                     autoComplete="off"
                     autoCorrect="off"
@@ -88,7 +87,7 @@ const ScanInput = ({ onScan }) => {
             </div>
 
             <p className="mt-2 text-sm text-gray-500 text-center">
-                Scan card 
+                Scan card or type Employee No (e.g., P1553) + Enter
             </p>
         </div>
     );

@@ -6,39 +6,42 @@ const ScanInput = ({ onScan }) => {
     const inputRef = useRef(null);
 
     useEffect(() => {
-        // Auto-focus input on mount
-        if (inputRef.current) {
-            inputRef.current.focus();
-        }
+        const el = inputRef.current;
+        if (!el) return;
 
-        // Keep focus on input unless user clicks away intentionally
+        el.focus();
+
+        // ✅ เปิด auto-refocus กลับ (ถูก comment ออกในของเดิม)
+        //    ป้องกัน iOS เปิด/ปิด virtual keyboard แล้ว focus หาย
         const handleBlur = () => {
             setTimeout(() => {
-                if (inputRef.current) {
-                    inputRef.current.focus();
-                }
+                if (inputRef.current) inputRef.current.focus();
             }, 100);
         };
 
-        // inputRef.current?.addEventListener('blur', handleBlur);
-        // return () => inputRef.current?.removeEventListener('blur', handleBlur);
+        el.addEventListener('blur', handleBlur);
+        return () => el.removeEventListener('blur', handleBlur);
     }, []);
 
     const handleChange = (e) => {
-        const value = e.target.value;
-        // Allow numbers and letters for EmpNo
-        setInput(value.toUpperCase());
-
-        // Auto-submit if 10 digits (CardNo)
-        if (/^\d{10}$/.test(value)) {
-            onScan(value);
-            setInput('');
-        }
+        // ✅ ลบ auto-submit ออก — useCardReader จัดการแล้ว
+        //    ScanInput ทำหน้าที่แค่แสดงค่าที่กำลังพิมพ์เท่านั้น
+        setInput(e.target.value.toUpperCase());
     };
 
     const handleKeyDown = (e) => {
-        if (e.key === 'Enter' && input.length > 0) {
-            onScan(input);
+        // ✅ ใช้สำหรับ manual EmpNo พิมพ์เอง + Enter เท่านั้น
+        //    useCardReader จะจัดการ CardNo จาก RFID อยู่แล้ว
+        if (e.key === 'Enter' && input.trim().length > 0) {
+            e.preventDefault(); // ✅ ป้องกัน iOS form submit
+            const trimmed = input.trim();
+
+            // ✅ pad 0 นำหน้าถ้าเป็นตัวเลขล้วน
+            const padded = /^\d+$/.test(trimmed)
+                ? trimmed.padStart(10, '0')
+                : trimmed.toUpperCase();
+
+            onScan(padded);
             setInput('');
         }
     };
@@ -62,8 +65,13 @@ const ScanInput = ({ onScan }) => {
                     onKeyDown={handleKeyDown}
                     maxLength={20}
                     placeholder="Scan CardNo or type EmpNo..."
-                    className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-center tracking-widest font-mono"
+                    inputMode="none"        // ✅ ป้องกัน virtual keyboard บน iOS
                     autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                    className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-center tracking-widest font-mono"
+                    style={{ caretColor: 'transparent' }} // ✅ ซ่อน cursor กระพริบ
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
                     {input.length}/20

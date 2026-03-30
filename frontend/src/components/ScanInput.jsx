@@ -67,7 +67,7 @@ const ScanInput = ({ onScan }) => {
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}
                     maxLength={20}
-                    placeholder="Scan CardNo or type EmpNo..."
+                    placeholder="Scan CardNo ..."
                     inputMode="none"
                     autoComplete="off"
                     autoCorrect="off"

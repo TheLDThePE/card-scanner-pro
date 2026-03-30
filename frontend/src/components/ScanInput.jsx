@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Scan, Keyboard } from 'lucide-react';
+// import { Scan, Keyboard } from 'lucide-react';
 
 const ScanInput = ({ onScan }) => {
     const [input, setInput] = useState('');
@@ -62,7 +62,7 @@ const ScanInput = ({ onScan }) => {
                     <Scan className="w-6 h-6 text-blue-600" />
                     Scan Card
                 </h2>
-                <Keyboard className="w-5 h-5 text-gray-400" />
+                // <Keyboard className="w-5 h-5 text-gray-400" />
             </div>
 
             <div className="relative">
@@ -73,7 +73,7 @@ const ScanInput = ({ onScan }) => {
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}
                     maxLength={20}
-                    placeholder="Scan CardNo or type EmpNo..."
+                    placeholder="Scan CardNo .."
                     inputMode="none"
                     autoComplete="off"
                     autoCorrect="off"

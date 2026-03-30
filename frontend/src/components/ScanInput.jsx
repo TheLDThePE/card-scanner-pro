@@ -88,7 +88,7 @@ const ScanInput = ({ onScan }) => {
             </div>
 
             <p className="mt-2 text-sm text-gray-500 text-center">
-                Scan card or type Employee No (e.g., P1553) + Enter
+                Scan card 
             </p>
         </div>
     );

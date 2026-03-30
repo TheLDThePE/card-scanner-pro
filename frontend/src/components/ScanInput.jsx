@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ScanLine, Keyboard } from 'lucide-react'; // ✅ เปลี่ยน Scan → ScanLine
+import { ScanLine } from 'lucide-react'; // ✅ เอา Keyboard ออก
 
 const ScanInput = ({ onScan }) => {
     const [input, setInput] = useState('');
@@ -11,7 +11,6 @@ const ScanInput = ({ onScan }) => {
 
         el.focus();
 
-        // ✅ เปิด auto-refocus — ป้องกัน iOS focus หาย
         const handleBlur = () => {
             setTimeout(() => {
                 const activeEl = document.activeElement;
@@ -33,7 +32,6 @@ const ScanInput = ({ onScan }) => {
     }, []);
 
     const handleChange = (e) => {
-        // ✅ แค่แสดงค่า — useCardReader จัดการ CardNo แล้ว
         setInput(e.target.value.toUpperCase());
     };
 
@@ -42,13 +40,11 @@ const ScanInput = ({ onScan }) => {
             e.preventDefault();
             const trimmed = input.trim();
 
-            // ✅ ตัวเลขล้วน = CardNo → ปล่อยให้ useCardReader จัดการ ไม่ยิงซ้ำ
             if (/^\d+$/.test(trimmed)) {
                 setInput('');
                 return;
             }
 
-            // EmpNo เช่น P1553, D6702 → pad ไม่ได้ ส่งตรง
             onScan(trimmed.toUpperCase());
             setInput('');
         }
@@ -56,12 +52,11 @@ const ScanInput = ({ onScan }) => {
 
     return (
         <div className="w-full max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center mb-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
                     <ScanLine className="w-6 h-6 text-blue-600" />
                     Scan Card
                 </h2>
-                <Keyboard className="w-5 h-5 text-gray-400" />
             </div>
 
             <div className="relative">
@@ -85,10 +80,7 @@ const ScanInput = ({ onScan }) => {
                     {input.length}/20
                 </div>
             </div>
-
-            <p className="mt-2 text-sm text-gray-500 text-center">
-                Scan card or type Employee No (e.g., P1553) + Enter
-            </p>
+            {/* ✅ เอาข้อความ hint ออกแล้ว */}
         </div>
     );
 };

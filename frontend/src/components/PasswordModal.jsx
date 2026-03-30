@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, X, Delete } from 'lucide-react';
+import { Lock, X, Delete, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const CORRECT_PIN = '1234';
@@ -7,6 +7,8 @@ const PIN_LENGTH = 4;
 
 const PasswordModal = ({ isOpen, onClose, onSuccess, onConfirm, title = "Enter Password", message }) => {
     const [pin, setPin] = useState('');
+    const [step, setStep] = useState('pin'); // 'pin' | 'confirm'
+    const [isProcessing, setIsProcessing] = useState(false);
 
     if (!isOpen) return null;
 
@@ -15,19 +17,17 @@ const PasswordModal = ({ isOpen, onClose, onSuccess, onConfirm, title = "Enter P
         const newPin = pin + digit;
         setPin(newPin);
 
-        // ✅ auto-submit เมื่อครบ 4 หลัก
         if (newPin.length === PIN_LENGTH) {
             setTimeout(() => {
                 if (newPin === CORRECT_PIN) {
-                    const callback = onConfirm || onSuccess;
-                    if (callback) callback();
+                    // ✅ PIN ถูก → ไปขั้นตอน confirm
                     setPin('');
-                    onClose();
+                    setStep('confirm');
                 } else {
                     toast.error('Incorrect PIN');
                     setPin('');
                 }
-            }, 200); // หน่วงนิดหน่อยให้เห็น dot ครบก่อน
+            }, 200);
         }
     };
 
@@ -37,10 +37,22 @@ const PasswordModal = ({ isOpen, onClose, onSuccess, onConfirm, title = "Enter P
 
     const handleClose = () => {
         setPin('');
+        setStep('pin');
+        setIsProcessing(false);
         onClose();
     };
 
-    // ปุ่ม numpad
+    const handleConfirm = async () => {
+        setIsProcessing(true);
+        const callback = onConfirm || onSuccess;
+        if (callback) await callback();
+        setIsProcessing(false);
+        setStep('pin');
+        setPin('');
+        toast.success('✅ ดำเนินการเรียบร้อยแล้ว', { duration: 3000 });
+        onClose();
+    };
+
     const buttons = [
         ['1', '2', '3'],
         ['4', '5', '6'],
@@ -63,63 +75,95 @@ const PasswordModal = ({ isOpen, onClose, onSuccess, onConfirm, title = "Enter P
                     </button>
                 </div>
 
-                <div className="p-6">
-                    {/* Message */}
-                    {message && (
-                        <p className="text-sm text-gray-500 text-center mb-4">{message}</p>
-                    )}
+                {/* ── Step 1: PIN ── */}
+                {step === 'pin' && (
+                    <div className="p-6">
+                        {message && (
+                            <p className="text-sm text-gray-500 text-center mb-4">{message}</p>
+                        )}
 
-                    {/* PIN dots */}
-                    <div className="flex justify-center gap-4 mb-6">
-                        {Array.from({ length: PIN_LENGTH }).map((_, i) => (
-                            <div
-                                key={i}
-                                className={`w-4 h-4 rounded-full border-2 transition-all ${
-                                    i < pin.length
-                                        ? 'bg-blue-600 border-blue-600'
-                                        : 'bg-white border-gray-300'
-                                }`}
-                            />
-                        ))}
-                    </div>
+                        {/* PIN dots */}
+                        <div className="flex justify-center gap-4 mb-6">
+                            {Array.from({ length: PIN_LENGTH }).map((_, i) => (
+                                <div
+                                    key={i}
+                                    className={`w-4 h-4 rounded-full border-2 transition-all ${
+                                        i < pin.length
+                                            ? 'bg-blue-600 border-blue-600'
+                                            : 'bg-white border-gray-300'
+                                    }`}
+                                />
+                            ))}
+                        </div>
 
-                    {/* PIN Pad */}
-                    <div className="grid grid-cols-3 gap-3">
-                        {buttons.flat().map((btn, idx) => {
-                            if (btn === null) {
-                                return <div key={idx} />;
-                            }
-                            if (btn === 'del') {
+                        {/* PIN Pad */}
+                        <div className="grid grid-cols-3 gap-3">
+                            {buttons.flat().map((btn, idx) => {
+                                if (btn === null) return <div key={idx} />;
+                                if (btn === 'del') {
+                                    return (
+                                        <button
+                                            key={idx}
+                                            onClick={handleDelete}
+                                            className="flex items-center justify-center h-14 rounded-xl bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors text-gray-600"
+                                        >
+                                            <Delete className="w-5 h-5" />
+                                        </button>
+                                    );
+                                }
                                 return (
                                     <button
                                         key={idx}
-                                        onClick={handleDelete}
-                                        className="flex items-center justify-center h-14 rounded-xl bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors text-gray-600"
+                                        onClick={() => handleDigit(btn)}
+                                        className="flex items-center justify-center h-14 rounded-xl bg-gray-100 hover:bg-blue-50 active:bg-blue-100 transition-colors text-xl font-semibold text-gray-800"
                                     >
-                                        <Delete className="w-5 h-5" />
+                                        {btn}
                                     </button>
                                 );
-                            }
-                            return (
-                                <button
-                                    key={idx}
-                                    onClick={() => handleDigit(btn)}
-                                    className="flex items-center justify-center h-14 rounded-xl bg-gray-100 hover:bg-blue-50 active:bg-blue-100 transition-colors text-xl font-semibold text-gray-800"
-                                >
-                                    {btn}
-                                </button>
-                            );
-                        })}
-                    </div>
+                            })}
+                        </div>
 
-                    {/* Cancel */}
-                    <button
-                        onClick={handleClose}
-                        className="w-full mt-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
-                    >
-                        Cancel
-                    </button>
-                </div>
+                        <button
+                            onClick={handleClose}
+                            className="w-full mt-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                )}
+
+                {/* ── Step 2: Confirm ── */}
+                {step === 'confirm' && (
+                    <div className="p-6 flex flex-col items-center gap-4">
+                        <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center">
+                            <AlertTriangle className="w-7 h-7 text-red-500" />
+                        </div>
+
+                        <div className="text-center">
+                            <p className="font-semibold text-gray-800 text-lg">แน่ใจหรือไม่?</p>
+                            <p className="text-sm text-gray-500 mt-1">
+                                {message || 'การดำเนินการนี้ไม่สามารถย้อนกลับได้'}
+                            </p>
+                        </div>
+
+                        <div className="flex gap-3 w-full mt-2">
+                            <button
+                                onClick={handleClose}
+                                className="flex-1 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
+                            >
+                                ยกเลิก
+                            </button>
+                            <button
+                                onClick={handleConfirm}
+                                disabled={isProcessing}
+                                className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-medium transition-colors disabled:opacity-50"
+                            >
+                                {isProcessing ? 'กำลังดำเนินการ...' : 'ยืนยัน ลบข้อมูล'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
             </div>
         </div>
     );

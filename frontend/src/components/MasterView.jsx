@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { ArrowLeft, Search, Users, Filter, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import { getCardDetails, isCardsLoaded, onCardsLoaded, reloadCards } from '../utils/cardDatabase';
+import { getCardDetails, isCardsLoaded, onCardsLoaded } from '../utils/cardDatabase';
 import DepartmentSummary from './DepartmentSummary';
 
 // Helper to get all cards from the database cache
@@ -151,16 +151,6 @@ const MasterView = ({ onBack, scans = [] }) => {
                     <h1 className="text-xl lg:text-2xl font-bold text-gray-800">Master Data View</h1>
                 </div>
                 <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => {
-                            reloadCards();
-                            setCardsReady(false);
-                            setTimeout(() => setCardsReady(true), 100);
-                        }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                    >
-                        🔄 Reload Data
-                    </button>
                     <div className="text-sm text-gray-500">
                         Total Records: {stats.total}
                     </div>

@@ -38,23 +38,7 @@ const MasterView = ({ onBack, scans = [] }) => {
     const allCards = useMemo(() => getAllCards(), [cardsReady]);
 
     // Statistics
-    const stats = useMemo(() => {
-        const total = allCards.length;
-        const phases = {
-            Phase1: allCards.filter(c => c.Phase === 'Phase1').length,
-            Phase2: allCards.filter(c => c.Phase === 'Phase2').length,
-            Phase3: allCards.filter(c => c.Phase === 'Phase3').length,
-            Unknown: allCards.filter(c => !c.Phase || c.Phase === 'N/A').length
-        };
-
-        // Count shifts
-        const shifts = {
-            ADM: allCards.filter(c => c.Shift === 'A' || c.Shift === 'D' || c.Shift === 'M').length,
-            BNC: allCards.filter(c => c.Shift === 'B' || c.Shift === 'N' || c.Shift === 'C').length
-        };
-
-        return { total, phases, shifts };
-    }, [allCards]);
+    const stats = useMemo(() => ({ total: allCards.length }), [allCards]);
 
     // Filter and Sort
     const processedData = useMemo(() => {
@@ -157,32 +141,14 @@ const MasterView = ({ onBack, scans = [] }) => {
                 </div>
             </div>
 
-            {/* Statistics Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+            {/* Total Employees */}
+            <div className="mb-6 max-w-xs">
                 <StatCard label="Total Employees" value={stats.total} color="text-blue-600" />
-                <StatCard label="Phase 1" value={stats.phases.Phase1} color="text-green-600" />
-                <StatCard label="Phase 2" value={stats.phases.Phase2} color="text-yellow-600" />
-                <StatCard label="Phase 3" value={stats.phases.Phase3} color="text-purple-600" />
-                <StatCard label="Unknown Phase" value={stats.phases.Unknown} color="text-red-600" />
             </div>
 
-            {/* Department Summary: scanned / total ต่อแผนก (ครบ = พื้นเขียว) */}
+            {/* Department Summary: แยกตามกะ ADM / BNC, scanned / total ต่อแผนก (ครบ = พื้นเขียว) */}
             <div className="mb-6">
                 <DepartmentSummary employees={allCards} scans={scans} />
-            </div>
-
-            {/* Shift Summary - ADM and BNC */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-lg shadow-sm border-2 border-orange-200">
-                    <h3 className="text-lg font-bold text-orange-800 mb-2">ADM</h3>
-                    <p className="text-4xl font-bold text-orange-600">{stats.shifts.ADM}</p>
-                    <p className="text-sm text-orange-600 mt-1">Shift A + D + M</p>
-                </div>
-                <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 p-6 rounded-lg shadow-sm border-2 border-cyan-200">
-                    <h3 className="text-lg font-bold text-cyan-800 mb-2">BNC</h3>
-                    <p className="text-4xl font-bold text-cyan-600">{stats.shifts.BNC}</p>
-                    <p className="text-sm text-cyan-600 mt-1">Shift B + N + C</p>
-                </div>
             </div>
 
             {/* Main Table Card */}

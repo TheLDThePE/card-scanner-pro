@@ -9,9 +9,10 @@ import MasterView from './components/MasterView';
 import { useFirestore } from './hooks/useFirestore';
 import { useCardReader } from './hooks/useCardReader';
 import { searchCard } from './utils/cardDatabase';
-import { Monitor, Trash2, Database } from 'lucide-react';
+import AccessGate from './components/AccessGate';
+import { Monitor, Trash2, Database, Lock } from 'lucide-react';
 
-function App() {
+function AppContent({ onLogout }) {
     const { scans, addScan, deleteScan, clearAllScans, loading, error } = useFirestore();
     const [isResetAllModalOpen, setIsResetAllModalOpen] = useState(false);
     const [currentView, setCurrentView] = useState('scan'); // 'scan' or 'master'
@@ -103,6 +104,14 @@ function App() {
                         <h1 className="text-2xl font-bold text-gray-800">Card Scanner Pro</h1>
                     </div>
                     {/* <NetworkStatus /> */}
+                    <button
+                        onClick={onLogout}
+                        title="Lock"
+                        className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-500 border border-gray-300 rounded-lg hover:bg-white transition-colors"
+                    >
+                        <Lock className="w-4 h-4" />
+                        Lock
+                    </button>
                 </div>
 
                 {/* Stats */}
@@ -162,6 +171,15 @@ function App() {
                 message="Are you sure you want to delete ALL scan records? This action cannot be undone."
             />
         </div>
+    );
+}
+
+// ครอบด้วยหน้ารหัสผ่าน: แอปหลักจะเริ่มทำงาน (Firestore, ตัวอ่านบัตร) หลังผ่านเท่านั้น
+function App() {
+    return (
+        <AccessGate>
+            {(logout) => <AppContent onLogout={logout} />}
+        </AccessGate>
     );
 }
 

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { ArrowLeft, Search, Users, Filter, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { getCardDetails, isCardsLoaded, onCardsLoaded, reloadCards } from '../utils/cardDatabase';
+import DepartmentSummary from './DepartmentSummary';
 
 // Helper to get all cards from the database cache
 // We need to export this from cardDatabase.js first, but for now we'll access the internal variable if possible
@@ -15,7 +16,8 @@ const StatCard = ({ label, value, color, subtext }) => (
     </div>
 );
 
-const MasterView = ({ onBack }) => {
+// scans = รายการสแกนวันนี้ (real-time จาก App) ใช้คำนวณ scanned/total ต่อแผนก
+const MasterView = ({ onBack, scans = [] }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(20);
@@ -45,20 +47,13 @@ const MasterView = ({ onBack }) => {
             Unknown: allCards.filter(c => !c.Phase || c.Phase === 'N/A').length
         };
 
-        // Count departments
-        const depts = {};
-        allCards.forEach(c => {
-            const dept = c.Department || 'Unknown';
-            depts[dept] = (depts[dept] || 0) + 1;
-        });
-
         // Count shifts
         const shifts = {
             ADM: allCards.filter(c => c.Shift === 'A' || c.Shift === 'D' || c.Shift === 'M').length,
             BNC: allCards.filter(c => c.Shift === 'B' || c.Shift === 'N' || c.Shift === 'C').length
         };
 
-        return { total, phases, depts, shifts };
+        return { total, phases, shifts };
     }, [allCards]);
 
     // Filter and Sort
@@ -143,9 +138,9 @@ const MasterView = ({ onBack }) => {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onBack}
@@ -153,7 +148,7 @@ const MasterView = ({ onBack }) => {
                     >
                         <ArrowLeft className="w-6 h-6 text-gray-600" />
                     </button>
-                    <h1 className="text-2xl font-bold text-gray-800">Master Data View</h1>
+                    <h1 className="text-xl lg:text-2xl font-bold text-gray-800">Master Data View</h1>
                 </div>
                 <div className="flex items-center gap-4">
                     <button
@@ -173,7 +168,7 @@ const MasterView = ({ onBack }) => {
             </div>
 
             {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                 <StatCard label="Total Employees" value={stats.total} color="text-blue-600" />
                 <StatCard label="Phase 1" value={stats.phases.Phase1} color="text-green-600" />
                 <StatCard label="Phase 2" value={stats.phases.Phase2} color="text-yellow-600" />
@@ -181,17 +176,9 @@ const MasterView = ({ onBack }) => {
                 <StatCard label="Unknown Phase" value={stats.phases.Unknown} color="text-red-600" />
             </div>
 
-            {/* Department Summary */}
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6 overflow-x-auto">
-                <h3 className="text-sm font-medium text-gray-500 mb-3">Department Summary</h3>
-                <div className="flex gap-4 min-w-max">
-                    {Object.entries(stats.depts).map(([dept, count]) => (
-                        <div key={dept} className="px-4 py-2 bg-gray-50 rounded-md border border-gray-100">
-                            <span className="text-xs text-gray-500 block">{dept}</span>
-                            <span className="text-lg font-bold text-gray-700">{count}</span>
-                        </div>
-                    ))}
-                </div>
+            {/* Department Summary: scanned / total ต่อแผนก (ครบ = พื้นเขียว) */}
+            <div className="mb-6">
+                <DepartmentSummary employees={allCards} scans={scans} />
             </div>
 
             {/* Shift Summary - ADM and BNC */}
@@ -242,7 +229,7 @@ const MasterView = ({ onBack }) => {
                                     </th>
                                 ))}
                             </tr>
-                            {/* Filter Row */}
+                            {/* Filter Row (text-base บนมือถือ กัน iOS ซูมจออัตโนมัติตอนแตะช่อง) */}
                             <tr className="bg-gray-50 border-b border-gray-200">
                                 {columns.map(col => (
                                     <th key={`filter-${col.key}`} className="px-2 py-2">
@@ -251,7 +238,7 @@ const MasterView = ({ onBack }) => {
                                             placeholder={`Filter ${col.label}...`}
                                             value={filters[col.key] || ''}
                                             onChange={(e) => handleFilterChange(col.key, e.target.value)}
-                                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 font-normal"
+                                            className="w-full min-w-[110px] px-2 py-1 text-base lg:text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 font-normal"
                                             onClick={(e) => e.stopPropagation()}
                                         />
                                     </th>
@@ -280,7 +267,7 @@ const MasterView = ({ onBack }) => {
                 </div>
 
                 {/* Pagination */}
-                <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+                <div className="px-4 lg:px-6 py-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-gray-50">
                     <div className="text-sm text-gray-500">
                         Showing {Math.min((currentPage - 1) * itemsPerPage + 1, processedData.length)} to {Math.min(currentPage * itemsPerPage, processedData.length)} of {processedData.length} entries
                     </div>

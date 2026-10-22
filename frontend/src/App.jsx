@@ -84,9 +84,9 @@ function App() {
         ).length
     };
 
-    // Render Master View
+    // Render Master View (ส่ง scans เข้าไปเพื่อแสดง scanned/total ต่อแผนก)
     if (currentView === 'master') {
-        return <MasterView onBack={() => setCurrentView('scan')} />;
+        return <MasterView onBack={() => setCurrentView('scan')} scans={scans} />;
     }
 
     // Render Scan Page

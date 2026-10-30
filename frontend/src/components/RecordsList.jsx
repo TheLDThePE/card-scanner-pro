@@ -5,6 +5,7 @@ import PasswordModal from './PasswordModal';
 const RecordsList = ({ scans, onDelete }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedScanId, setSelectedScanId] = useState(null);
+    const [visibleCount, setVisibleCount] = useState(50); // แสดงกี่แถว (ล่าสุดก่อน)
     const [filters, setFilters] = useState({
         cardNumber: '',
         EmpNo: '',
@@ -32,6 +33,7 @@ const RecordsList = ({ scans, onDelete }) => {
 
     const handleFilterChange = (field, value) => {
         setFilters(prev => ({ ...prev, [field]: value }));
+        setVisibleCount(50);
     };
 
     // Filter scans based on all filter criteria
@@ -46,6 +48,14 @@ const RecordsList = ({ scans, onDelete }) => {
         });
     }, [scans, filters]);
 
+    // ลำดับการสแกนสะสม: คนแรก = 1 ... ล่าสุด = จำนวนทั้งหมด (ไม่เปลี่ยนตอนกรอง/ดูเพิ่ม)
+    const seqById = useMemo(() => {
+        const list = scans || [];
+        const map = new Map();
+        list.forEach((s, i) => map.set(s.id, list.length - i));
+        return map;
+    }, [scans]);
+
     if (!scans || scans.length === 0) {
         return (
             <div className="text-center py-10 text-gray-500 bg-white rounded-lg shadow-sm">
@@ -53,6 +63,8 @@ const RecordsList = ({ scans, onDelete }) => {
             </div>
         );
     }
+
+    const visibleScans = filteredScans.slice(0, visibleCount);
 
     return (
         <>
@@ -64,6 +76,7 @@ const RecordsList = ({ scans, onDelete }) => {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-gray-50 text-gray-600 text-sm">
+                                <th className="px-4 py-3 font-medium w-16" title="Scan order (first scan = 1)">No.</th>
                                 <th className="px-6 py-3 font-medium">CardNo</th>
                                 <th className="px-6 py-3 font-medium">EmpNo</th>
                                 <th className="px-6 py-3 font-medium">Name</th>
@@ -80,6 +93,7 @@ const RecordsList = ({ scans, onDelete }) => {
                             </tr>
                             {/* Filter Row */}
                             <tr className="bg-white border-b border-gray-200">
+                                <th className="px-2 py-2"></th>
                                 <th className="px-2 py-2">
                                     <input
                                         type="text"
@@ -182,8 +196,11 @@ const RecordsList = ({ scans, onDelete }) => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {filteredScans.map((scan) => (
+                            {visibleScans.map((scan) => (
                                 <tr key={scan.id} className="hover:bg-gray-50 transition-colors">
+                                    <td className="px-4 py-4 text-sm font-medium text-gray-500">
+                                        {seqById.get(scan.id)}
+                                    </td>
                                     <td className="px-6 py-4 font-mono text-sm font-medium text-gray-800">
                                         {scan.cardNumber}
                                     </td>
@@ -242,6 +259,26 @@ const RecordsList = ({ scans, onDelete }) => {
                             ))}
                         </tbody>
                     </table>
+                </div>
+
+                <div className="px-6 py-3 border-t border-gray-100 bg-gray-50 flex flex-wrap items-center justify-between gap-2 text-sm text-gray-500">
+                    <span>Showing {visibleScans.length} of {filteredScans.length} records (latest first)</span>
+                    {visibleScans.length < filteredScans.length && (
+                        <span className="flex gap-2">
+                            <button
+                                onClick={() => setVisibleCount(c => c + 50)}
+                                className="px-3 py-1.5 rounded-md border border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+                            >
+                                Show 50 more
+                            </button>
+                            <button
+                                onClick={() => setVisibleCount(filteredScans.length)}
+                                className="px-3 py-1.5 rounded-md border border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+                            >
+                                Show all
+                            </button>
+                        </span>
+                    )}
                 </div>
             </div>
 

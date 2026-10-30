@@ -8,7 +8,7 @@ import PasswordModal from './components/PasswordModal';
 import MasterView from './components/MasterView';
 import { useFirestore } from './hooks/useFirestore';
 import { useCardReader } from './hooks/useCardReader';
-import { searchCard } from './utils/cardDatabase';
+import { searchCard, isCardsLoaded } from './utils/cardDatabase';
 import AccessGate from './components/AccessGate';
 import { Monitor, Trash2, Database, Lock } from 'lucide-react';
 
@@ -18,6 +18,12 @@ function AppContent({ onLogout }) {
     const [currentView, setCurrentView] = useState('scan'); // 'scan' or 'master'
 
     const handleScan = async (input) => {
+        // รายชื่อ (Master) ยังโหลดไม่เสร็จ -> ไม่บันทึก ไม่งั้นทุกคนจะถูกบันทึกเป็น Unknown
+        if (!isCardsLoaded()) {
+            toast.error('ยังโหลดรายชื่อไม่เสร็จ กรุณารอสักครู่แล้วสแกนใหม่', { duration: 4000 });
+            return;
+        }
+
         // Search by CardNo or EmpNo
         const cardDetails = searchCard(input);
 
@@ -96,6 +102,12 @@ function AppContent({ onLogout }) {
             <Toaster position="top-right" />
 
             <div className="max-w-7xl mx-auto space-y-6">
+                {error && (
+                    <div className="p-3 rounded-lg bg-red-50 border border-red-300 text-red-700 text-sm">
+                        ⚠️ เชื่อมต่อฐานข้อมูลมีปัญหา ({error.code || 'error'}) ข้อมูลอาจไม่อัปเดต กรุณารีเฟรชหน้า หรือแจ้งผู้ดูแล
+                    </div>
+                )}
+
                 {/* Header */}
 
                 <div className="flex items-center justify-between">

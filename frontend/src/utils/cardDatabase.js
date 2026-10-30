@@ -36,9 +36,9 @@ const loadCards = async () => {
 
             console.log(`Loaded ${Object.keys(CARD_DATABASE).length} cards from Firestore`);
         } catch (error) {
-            console.error('Error loading cards:', error);
+            console.error('Error loading cards (retry in 5s):', error);
             loadPromise = null;
-            throw error;
+            setTimeout(() => { loadCards(); }, 5000);
         }
     })();
 

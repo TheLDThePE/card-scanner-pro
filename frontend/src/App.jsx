@@ -28,10 +28,8 @@ function AppContent({ onLogout }) {
         const cardDetails = searchCard(input);
 
         const scanData = {
-            // cardNumber: input,
             cardNumber: cardDetails?.CardNo || input,  // ← ใช้ CardNo จาก Master ถ้ามี
             name: cardDetails?.Name || 'Unknown',
-            // EmpNo: cardDetails?.EmpNo || 'N/A',
             EmpNo: cardDetails?.EmpNo || input,  // ← ถ้าไม่เจอใน Master ใช้ input เป็น EmpNo
             GroupCode: cardDetails?.GroupCode || 'N/A',
             ZoneCode: cardDetails?.ZoneCode || 'N/A',
@@ -99,7 +97,31 @@ function AppContent({ onLogout }) {
     // Render Scan Page
     return (
         <div className="min-h-screen bg-gray-50 p-6">
-            <Toaster position="top-right" />
+            {/* ปรับแต่ง Toast ให้ใหญ่และเด่นชัดขึ้นบนมือถือ โดยยังคงเงื่อนไขเดิมทั้งหมด */}
+            <Toaster 
+                position="top-right" 
+                toastOptions={{
+                    style: {
+                        background: '#1e293b',
+                        color: '#ffffff',
+                        fontSize: '16px',
+                        padding: '14px 20px',
+                        borderRadius: '10px',
+                        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.4)',
+                        maxWidth: '90vw',
+                    },
+                    success: {
+                        style: {
+                            background: '#15803d', // สีเขียวเข้มเด่นชัดเมื่อสแกนสำเร็จ
+                        },
+                    },
+                    error: {
+                        style: {
+                            background: '#b91c1c', // สีแดงเข้มเด่นชัดเมื่อสแกนซ้ำ หรือ Unknown
+                        },
+                    },
+                }} 
+            />
 
             <div className="max-w-7xl mx-auto space-y-6">
                 {error && (
@@ -109,13 +131,11 @@ function AppContent({ onLogout }) {
                 )}
 
                 {/* Header */}
-
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Monitor className="w-8 h-8 text-blue-600" />
                         <h1 className="text-2xl font-bold text-gray-800">Card Scanner Pro</h1>
                     </div>
-                    {/* <NetworkStatus /> */}
                     <button
                         onClick={onLogout}
                         title="Lock"
@@ -155,7 +175,7 @@ function AppContent({ onLogout }) {
                         <span className="text-[10px] lg:text-xs text-cyan-500 mt-1 lg:mt-2 text-center">Shift B + N + C</span>
                     </div>
 
-                    {/* Scanner (Center on Desktop, Top on Mobile) */}
+                    {/* Scanner */}
                     <div className="col-span-2 order-1 lg:order-4 lg:flex-1 w-full">
                         <ScanInput onScan={handleScan} />
                     </div>
@@ -186,7 +206,6 @@ function AppContent({ onLogout }) {
     );
 }
 
-// ครอบด้วยหน้ารหัสผ่าน: แอปหลักจะเริ่มทำงาน (Firestore, ตัวอ่านบัตร) หลังผ่านเท่านั้น
 function App() {
     return (
         <AccessGate>
@@ -196,3 +215,4 @@ function App() {
 }
 
 export default App;
+```[cite: 2]

@@ -46,9 +46,14 @@ function AppContent({ onLogout }) {
         if (scanData.EmpNo !== 'N/A') {
             const isDuplicate = scans.some(scan => scan.EmpNo === scanData.EmpNo);
             if (isDuplicate) {
+                // แยกสีส้มเฉพาะเคสสแกนซ้ำ (Already scanned)
                 toast.error(`⚠️ Already scanned: ${cardDetails?.Name || input} (${scanData.EmpNo})`, {
                     duration: 4000,
-                    icon: '⚠️'
+                    icon: '⚠️',
+                    style: {
+                        background: '#d97706', // สีส้มเด่นชัด
+                        color: '#ffffff',
+                    }
                 });
                 return; // Don't add duplicate scan
             }
@@ -97,31 +102,36 @@ function AppContent({ onLogout }) {
     // Render Scan Page
     return (
         <div className="min-h-screen bg-gray-50 p-6">
-            {/* ปรับแต่ง Toast ให้ใหญ่และเด่นชัดขึ้นบนมือถือ โดยยังคงเงื่อนไขเดิมทั้งหมด */}
-         <Toaster 
-    position="top-center" // เปลี่ยนตำแหน่งเป็นกลางจอขอบบน (หรือใช้ 'top-right' เหมือนเดิมก็ได้)
-    toastOptions={{
-        style: {
-            background: '#1e293b',
-            color: '#ffffff',
-            fontSize: '18px',     // ขยายฟอนต์ให้ใหญ่สะใจ
-            padding: '16px 24px', // ขยายกล่องให้ใหญ่ขึ้น
-            borderRadius: '12px',
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)',
-            maxWidth: '90vw',
-        },
-        success: {
-            style: {
-                background: '#15803d', // สีเขียวเข้ม (สแกนสำเร็จ)
-            },
-        },
-        error: {
-            style: {
-                background: '#b91c1c', // สีแดงเข้ม (กรณี Unknown หรือ Error ทั่วไป)
-            },
-        },
-    }} 
-/>
+            {/* ตั้งค่า Toast กลางจอทุกสถานะ และรองรับ Responsive มือถือทุกรุ่น */}
+            <Toaster 
+                position="top-center"
+                containerStyle={{
+                    top: '35vh', // ดันตำแหน่งลงมาให้อยู่กึ่งกลางหน้าจอพอดี
+                }}
+                toastOptions={{
+                    style: {
+                        background: '#1e293b',
+                        color: '#ffffff',
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        padding: '16px 24px',
+                        borderRadius: '12px',
+                        boxShadow: '0 20px 30px -10px rgba(0, 0, 0, 0.5)',
+                        maxWidth: '90vw',
+                        textAlign: 'center',
+                    },
+                    success: {
+                        style: {
+                            background: '#15803d', // สีเขียวเข้ม (สแกนสำเร็จ)
+                        },
+                    },
+                    error: {
+                        style: {
+                            background: '#b91c1c', // สีแดงเข้ม (Unknown / ระบบขัดข้อง)
+                        },
+                    },
+                }} 
+            />
 
             <div className="max-w-7xl mx-auto space-y-6">
                 {error && (

@@ -1,5 +1,17 @@
 import { useEffect, useRef } from 'react';
 
+// ช่องที่พิมพ์ได้ (ช่องค้นหา / ช่อง Filter ฯลฯ)
+const isEditable = (el) => {
+    if (!el || !el.tagName) return false;
+    const tag = el.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || !!el.isContentEditable;
+};
+
+// ช่องสแกนของแอป: ถ้าอยู่ในโหมด Scanner จะมี inputmode="none"
+// (หรือจะใส่ data-scan-input ไว้ที่ช่องก็ได้) ช่องนี้ตัวอ่านบัตรพิมพ์ลงไปได้ตามปกติ
+const isScanField = (el) =>
+    el.hasAttribute('data-scan-input') || el.getAttribute('inputmode') === 'none';
+
 export const useCardReader = (onScan) => {
     const buffer = useRef('');
     const lastKeyTime = useRef(Date.now());
@@ -25,6 +37,15 @@ export const useCardReader = (onScan) => {
         };
 
         const handleKeyDown = (e) => {
+            // ✅ คีย์ที่พิมพ์ในช่องอื่น (ค้นหา/Filter) ไม่ใช่การสแกน: ไม่เก็บลง buffer และไม่ submit
+            //    กันเกิดรายการ Unknown เองตอนพิมพ์ค้นหาแล้วกด Enter หรือพิมพ์เลข 9 หลักเร็วๆ
+            const target = e.target;
+            if (isEditable(target) && !isScanField(target)) {
+                buffer.current = '';
+                clearTimeout(submitTimer.current);
+                return;
+            }
+
             const currentTime = Date.now();
 
             // ✅ ถ้าช้าเกิน threshold → reset buffer (manual typing)
